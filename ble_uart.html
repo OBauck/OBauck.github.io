@@ -79,7 +79,7 @@
 
   function onConnectButtonClick() {
 
-    log('Requesting Bluetooth Device with Led Button Service');
+    log('Requesting Bluetooth Device with Nordic Uart Service');
     navigator.bluetooth.requestDevice({
         filters: [{
         services: [serviceUuid]
@@ -99,7 +99,7 @@
     })
     .then(characteristic => {
       myCharacteristic = characteristic;
-      log("connected to device, push button to toggle led.");
+      log("connected to device, send push button to send text.");
     })
     .catch(error => {
       document.querySelector('#writeButton').disabled = true;
@@ -119,7 +119,7 @@ function onWriteButtonClick(){
   myCharacteristic.writeValue(encoder.encode(value))
 
   .then(_ => {
-    log('> Characteristic User Description changed to: ' + value);
+    log('sent: ' + value);
   })
   .catch(error => {
     log('Argh! ' + error);
