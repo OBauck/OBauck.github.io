@@ -105,8 +105,16 @@
 function onLedButtonClick(){
   if(myCharacteristic)
   {
-    toggle_value = !toggle_value;
-    myCharacteristic.writeValue(toggle_value);
+    if(toggle_value == 0)
+    {
+      toggle_value = 1;
+    }
+    else
+    {
+      toggle_value = 0;
+    }
+    let ledValue = new Uint8Array([toggle_value]);
+    myCharacteristic.writeValue(ledValue);
   }
   else
   {
