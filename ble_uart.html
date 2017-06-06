@@ -82,7 +82,7 @@
     log('Requesting Bluetooth Device with Led Button Service');
     navigator.bluetooth.requestDevice({
         filters: [{
-        services: ['00001523-1212-efde-1523-785feabcd123']
+        services: [serviceUuid]
       }]
     })
     .then(device => {
