@@ -95,10 +95,10 @@
     .then(characteristic => {
       myCharacteristic = characteristic;
       log("connected to device, reading characteristic value");
-      myCharacteristic.readValue();
+      return myCharacteristic.readValue();
     })
     .then(value => {
-      log("Value: " + decoder.decode(value));
+      log('Value: ' + decoder.decode(value));
     })
     .catch(error => {
       log('Argh! ' + error);
