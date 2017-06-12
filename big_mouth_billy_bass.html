@@ -105,7 +105,7 @@
       characteristics.forEach(characteristic => {
         switch (characteristic.uuid) {
           case characteristicUuid1:
-            log("reading characteristic 1 value");
+            log("reading characteristic 1");
             queue = queue.then(_ => characteristic.readValue()).then(value => {
               addButtons(decoder.decode(value))
               log('Value: \n' + decoder.decode(value));
@@ -137,7 +137,7 @@ function onButtonClick()
 
     myCharacteristic2.writeValue(encoder.encode(this.name));
     */
-    new Uint8Array([1]);
+    let ledValue = new Uint8Array([1]);
 
     myCharacteristic2.writeValue(ledValue);
   }
