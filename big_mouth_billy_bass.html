@@ -130,16 +130,11 @@ function onButtonClick()
 {
   if(myCharacteristic2)
   {
-    
-    let encoder = new TextEncoder('utf-8');
-
     log(this.name);
-
-    myCharacteristic2.writeValue(encoder.encode(this.name));
     
-    //let ledValue = new Uint8Array([1]);
+    let ledValue = new Uint8Array([parseInt(this.name)]);
 
-    //myCharacteristic2.writeValue(ledValue);
+    myCharacteristic2.writeValue(ledValue);
   }
 }
 
