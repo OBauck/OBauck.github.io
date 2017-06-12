@@ -28,7 +28,13 @@
 <body>
 
 <p>
-<button id="connectButton">Connect</button>
+  <button id="connectButton">Connect</button>
+</p>
+
+<p id="buttons">
+
+
+
 </p>
 
 <h3>Live Output</h3>
@@ -98,6 +104,7 @@
       return myCharacteristic.readValue();
     })
     .then(value => {
+      addButtons(decoder.decode(value))
       log('Value: ' + decoder.decode(value));
     })
     .catch(error => {
@@ -105,7 +112,26 @@
     });
   } 
 
+function addButtons(str)
+{
+  var btn;
+  var buttonText;
+  var buttonParagraph = document.querySelector('#buttons');
+
+  var res = str.split("\n");
+  for(i = 0; i < res.length; i++)
+  {
+    btn = document.createElement("BUTTON");
+    buttonText = document.createTextNode(res[i]);
+    btn.appendChild(buttonText);
+    buttonParagraph.appendChild(btn);
+
+    log(res[i]);
+  }
+}
+
 document.querySelector('#connectButton').addEventListener('click', function() {
+
   if (isWebBluetoothEnabled()) {
     ChromeSamples.clearLog();
     onConnectButtonClick();
