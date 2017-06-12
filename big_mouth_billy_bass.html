@@ -108,7 +108,7 @@
             log("reading characteristic 1 value");
             queue = queue.then(_ => characteristic.readValue()).then(value => {
               addButtons(decoder.decode(value))
-              log('Value: ' + decoder.decode(value));
+              log('Value: \n' + decoder.decode(value));
             });
             break;
 
@@ -128,11 +128,19 @@
 
 function onButtonClick()
 {
-  let encoder = new TextEncoder('utf-8');
+  if(myCharacteristic2)
+  {
+    /*
+    let encoder = new TextEncoder('utf-8');
 
-  log(this.name);
+    log(this.name);
 
-  myCharacteristic2.writeValue(encoder.encode(this.name));
+    myCharacteristic2.writeValue(encoder.encode(this.name));
+    */
+    new Uint8Array([1]);
+
+    myCharacteristic2.writeValue(ledValue);
+  }
 }
 
 function addButtons(str)
