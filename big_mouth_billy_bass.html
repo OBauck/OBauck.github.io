@@ -29,10 +29,10 @@
 
 <p>
   <button id="connectButton"> Connect </button>
-  <button id="disconnectButton" style="display:none"> Disconnect </button>
+  <button id="disconnectButton" disabled="true"> Disconnect </button>
 </p>
 
-<p id="buttons">
+<p id="playButtons">
 
 </p>
 
@@ -71,19 +71,19 @@
 
   <script>
 
-  var myCharacteristic2;
+  var characteristicPlay;
   let decoder = new TextDecoder('utf-8');
 
-  let serviceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  let characteristicUuid1 = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
-  let characteristicUuid2 = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
+  let BmbbServiceUuid = '82240001-dfce-47ed-8ca1-d6b50d5a31bf';
+  let characteristicUuidSongs = '82240002-dfce-47ed-8ca1-d6b50d5a31bf'
+  let characteristicUuidPlay = '82240003-dfce-47ed-8ca1-d6b50d5a31bf'
 
   function onConnectButtonClick() {
 
-    log('Requesting Bluetooth Device with Nordic Uart Service');
+    log('Requesting Bluetooth Device with Big Mouth Billy Bass Service UUID');
     navigator.bluetooth.requestDevice({
         filters: [{
-        services: [serviceUuid]
+        services: [BmbbServiceUuid]
       }]
     })
     .then(device => {
@@ -92,7 +92,7 @@
     })
     .then(server => {
       log('Getting Service...');
-      return server.getPrimaryService(serviceUuid);
+      return server.getPrimaryService(BmbbServiceUuid);
     })
     .then(service => {
       log('Getting Characteristics...');
@@ -104,7 +104,7 @@
 
       characteristics.forEach(characteristic => {
         switch (characteristic.uuid) {
-          case characteristicUuid1:
+          case characteristicUuidSongs:
             log("reading characteristic 1");
             queue = queue.then(_ => characteristic.readValue()).then(value => {
               addButtons(decoder.decode(value))
@@ -112,9 +112,9 @@
             });
             break;
 
-          case characteristicUuid2:
+          case characteristicUuidPlay:
             log("storing characteristic 2")
-            myCharacteristic2 = characteristic;
+            characteristicPlay = characteristic;
             break;
         }
       })
@@ -126,15 +126,32 @@
     });
   } 
 
+function onDisconnectButtonClick() {
+  if (!bluetoothDevice) {
+    return;
+  }
+  log('Disconnecting from Bluetooth Device...');
+  if (bluetoothDevice.gatt.connected) {
+    bluetoothDevice.gatt.disconnect();
+  } else {
+    log('> Bluetooth Device is already disconnected');
+  }
+}
+
+function onDisconnected(event) {
+  // Object event.target is Bluetooth Device getting disconnected.
+  log('> Bluetooth Device disconnected');
+}
+
 function onButtonClick()
 {
-  if(myCharacteristic2)
+  if(characteristicPlay)
   {
     log(this.name);
     
     let ledValue = new Uint8Array([parseInt(this.name)]);
 
-    myCharacteristic2.writeValue(ledValue);
+    characteristicPlay.writeValue(ledValue);
   }
 }
 
@@ -142,7 +159,7 @@ function addButtons(str)
 {
   var btn;
   var buttonText;
-  var buttonParagraph = document.querySelector('#buttons');
+  var buttonParagraph = document.querySelector('#playButtons');
 
   var res = str.split("\n");
   for(i = 0; i < res.length; i++)
