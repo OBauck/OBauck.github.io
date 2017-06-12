@@ -67,7 +67,7 @@
   <script>
 
   var myCharacteristic;
-  let toggle_value = 0;
+  let decoder = new TextDecoder('utf-8');
 
   let serviceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
   let characteristicUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
