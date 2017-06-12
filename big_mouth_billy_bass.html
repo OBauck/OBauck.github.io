@@ -28,12 +28,11 @@
 <body>
 
 <p>
-  <button id="connectButton">Connect</button>
+  <button id="connectButton"> Connect </button>
+  <button id="disconnectButton" style="display:none"> Disconnect </button>
 </p>
 
 <p id="buttons">
-
-
 
 </p>
 
@@ -72,11 +71,12 @@
 
   <script>
 
-  var myCharacteristic;
+  var myCharacteristic2;
   let decoder = new TextDecoder('utf-8');
 
   let serviceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  let characteristicUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
+  let characteristicUuid1 = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
+  let characteristicUuid2 = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
 
   function onConnectButtonClick() {
 
@@ -95,22 +95,45 @@
       return server.getPrimaryService(serviceUuid);
     })
     .then(service => {
-      log('Getting Characteristic...');
-      return service.getCharacteristic(characteristicUuid);
+      log('Getting Characteristics...');
+      return service.getCharacteristics();
     })
-    .then(characteristic => {
-      myCharacteristic = characteristic;
-      log("connected to device, reading characteristic value");
-      return myCharacteristic.readValue();
-    })
-    .then(value => {
-      addButtons(decoder.decode(value))
-      log('Value: ' + decoder.decode(value));
+    .then(characteristics => {
+
+      let queue = Promise.resolve();
+
+      characteristics.forEach(characteristic => {
+        switch (characteristic.uuid) {
+          case characteristicUuid1:
+            log("reading characteristic 1 value");
+            queue = queue.then(_ => characteristic.readValue()).then(value => {
+              addButtons(decoder.decode(value))
+              log('Value: ' + decoder.decode(value));
+            });
+            break;
+
+          case characteristicUuid2:
+            log("storing characteristic 2")
+            myCharacteristic2 = characteristic;
+            break;
+        }
+      }
+
+      return queue;
     })
     .catch(error => {
       log('Argh! ' + error);
     });
   } 
+
+function onButtonClick()
+{
+  let encoder = new TextEncoder('utf-8');
+
+  log(this.name);
+
+  myCharacteristic.writeValue(encoder.encode(this.name));
+}
 
 function addButtons(str)
 {
@@ -122,20 +145,24 @@ function addButtons(str)
   for(i = 0; i < res.length; i++)
   {
     btn = document.createElement("BUTTON");
+    btn.name = i;
+    btn.onclick = onButtonClick;
     buttonText = document.createTextNode(res[i]);
     btn.appendChild(buttonText);
     buttonParagraph.appendChild(btn);
-
-    log(res[i]);
   }
 }
 
 document.querySelector('#connectButton').addEventListener('click', function() {
 
+  //addButtons("button1\nbutton2\nbutton3\nbutton4");
+
+
   if (isWebBluetoothEnabled()) {
     ChromeSamples.clearLog();
     onConnectButtonClick();
   }
+  
 });
 
 </script>
