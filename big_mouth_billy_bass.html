@@ -32,9 +32,9 @@
   <button id="disconnectButton" disabled="true"> Disconnect </button>
 </p>
 
-<p id="playButtons">
+<div id="playButtons">
 
-</p>
+</div>
 
 <h3>Live Output</h3>
 <div id="output" class="output">
@@ -166,6 +166,9 @@ function addButtons(str)
   {
     btn = document.createElement("BUTTON");
     btn.name = i;
+    //btn.style.width = "50%";
+    //btn.style.margin = "auto";
+    //btn.style.display = "block";
     btn.onclick = onButtonClick;
     buttonText = document.createTextNode(res[i]);
     btn.appendChild(buttonText);
@@ -175,7 +178,7 @@ function addButtons(str)
 
 document.querySelector('#connectButton').addEventListener('click', function() {
 
-  //addButtons("button1\nbutton2\nbutton3\nbutton4");
+  addButtons("button1\nbutton2\nbutton3\nbutton4");
 
 
   if (isWebBluetoothEnabled()) {

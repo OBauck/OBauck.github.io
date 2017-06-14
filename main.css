@@ -24,6 +24,21 @@ h3 {
   margin-top: 2em;
 }
 
+button {
+    text-align: center;
+    width: 50%;
+    margin: auto;
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 10px;
+}
+
+#playButtons {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
 .pageIcon {
   height: 2.3em;
   float: left;
