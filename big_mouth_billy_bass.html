@@ -34,7 +34,7 @@
 
 <div id="motionButtons">
 
-  <button id="motionHead" ontouchstart="onMotionHeadButtonClick()" ontouchend="onMotionHeadButtonRelease()"> Head </button>
+  <button id="motionHead" onclick="onMotionHeadButtonClick()"> Head </button>
   <button id="motionTail" ontouchstart="onMotionTailButtonClick()" ontouchend="onMotionTailButtonRelease()"> Tail </button>
   <button id="motionMouth" ontouchstart="onMotionMouthButtonClick()" ontouchend="onMotionMouthButtonRelease()"> Motion </button>
 
@@ -173,19 +173,9 @@ function onMotionHeadButtonClick()
 {
   if(characteristicMotion)
   {
-    log("Head out");
+    log("Head toggle");
+
     let ledValue = new Uint8Array([0]);
-
-    characteristicMotion.writeValue(ledValue);
-  }
-}
-
-function onMotionHeadButtonRelease()
-{
-  if(characteristicMotion)
-  {
-    log("Head in");
-    let ledValue = new Uint8Array([1]);
 
     characteristicMotion.writeValue(ledValue);
   }
