@@ -174,7 +174,7 @@ function onMotionHeadButtonClick()
   if(characteristicMotion)
   {
     log("Head out");
-    let ledValue = new Uint8Array([1]);
+    let ledValue = new Uint8Array([0]);
 
     characteristicMotion.writeValue(ledValue);
   }
@@ -185,7 +185,7 @@ function onMotionHeadButtonRelease()
   if(characteristicMotion)
   {
     log("Head in");
-    let ledValue = new Uint8Array([0x10]);
+    let ledValue = new Uint8Array([1]);
 
     characteristicMotion.writeValue(ledValue);
   }
@@ -207,7 +207,7 @@ function onMotionTailButtonRelease()
   if(characteristicMotion)
   {
     log("Tail in");
-    let ledValue = new Uint8Array([0x20]);
+    let ledValue = new Uint8Array([3]);
 
     characteristicMotion.writeValue(ledValue);
   }
@@ -218,7 +218,7 @@ function onMotionMouthButtonClick()
   if(characteristicMotion)
   {
     log("Mouth open");
-    let ledValue = new Uint8Array([3]);
+    let ledValue = new Uint8Array([4]);
 
     characteristicMotion.writeValue(ledValue);
   }
@@ -229,7 +229,7 @@ function onMotionMouthButtonRelease()
   if(characteristicMotion)
   {
     log("Tail close");
-    let ledValue = new Uint8Array([0x30]);
+    let ledValue = new Uint8Array([5]);
 
     characteristicMotion.writeValue(ledValue);
   }
