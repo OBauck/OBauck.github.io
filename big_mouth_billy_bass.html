@@ -32,6 +32,14 @@
   <button id="disconnectButton" disabled="true"> Disconnect </button>
 </p>
 
+<div id="motionButtons">
+
+  <button id="motionHead" onclick="onMotionHeadButtonClick()" ontouchend="onMotionHeadButtonRelease"> Head </button>
+  <button id="motionTail" onclick="onMotionTailButtonClick()" ontouchend="onMotionTailButtonRelease"> Tail </button>
+  <button id="motionMouth" onclick="onMotionMouthButtonClick()" ontouchend="onMotionMouthButtonRelease"> Motion </button>
+
+</div>
+
 <div id="playButtons">
 
 </div>
@@ -72,11 +80,13 @@
   <script>
 
   var characteristicPlay;
+  var characteristicMotion;
   let decoder = new TextDecoder('utf-8');
 
   let BmbbServiceUuid = '82240001-dfce-47ed-8ca1-d6b50d5a31bf';
   let characteristicUuidSongs = '82240003-dfce-47ed-8ca1-d6b50d5a31bf'
   let characteristicUuidPlay = '82240002-dfce-47ed-8ca1-d6b50d5a31bf'
+  let characteristicUuidMotion = '82240004-dfce-47ed-8ca1-d6b50d5a31bf'
 
   function onConnectButtonClick() {
 
@@ -105,16 +115,20 @@
       characteristics.forEach(characteristic => {
         switch (characteristic.uuid) {
           case characteristicUuidSongs:
-            log("reading characteristic 1");
+            log("reading characteristic songs");
             queue = queue.then(_ => characteristic.readValue()).then(value => {
-              addButtons(decoder.decode(value))
+              addPlayButtons(decoder.decode(value))
               log('Value: \n' + decoder.decode(value));
             });
             break;
 
           case characteristicUuidPlay:
-            log("storing characteristic 2")
+            log("storing characteristic play")
             characteristicPlay = characteristic;
+            break;
+          case characteristicUuidMotion:
+            log("storing characteristic motion")
+            characteristicMotion = characteristic;
             break;
         }
       })
@@ -143,7 +157,7 @@ function onDisconnected(event) {
   log('> Bluetooth Device disconnected');
 }
 
-function onButtonClick()
+function onPlayButtonClick()
 {
   if(characteristicPlay)
   {
@@ -155,7 +169,73 @@ function onButtonClick()
   }
 }
 
-function addButtons(str)
+function onMotionHeadButtonClick()
+{
+  if(characteristicMotion)
+  {
+    log("Head out");
+    let ledValue = new Uint8Array([1]);
+
+    characteristicMotion.writeValue(ledValue);
+  }
+}
+
+function onMotionHeadButtonRelease()
+{
+  if(characteristicMotion)
+  {
+    log("Head in");
+    let ledValue = new Uint8Array([0x10]);
+
+    characteristicMotion.writeValue(ledValue);
+  }
+}
+
+function onMotionTailButtonClick()
+{
+  if(characteristicMotion)
+  {
+    log("Tail out");
+    let ledValue = new Uint8Array([2]);
+
+    characteristicMotion.writeValue(ledValue);
+  }
+}
+
+function onMotionTailButtonRelease()
+{
+  if(characteristicMotion)
+  {
+    log("Tail in");
+    let ledValue = new Uint8Array([0x20]);
+
+    characteristicMotion.writeValue(ledValue);
+  }
+}
+
+function onMotionMouthButtonClick()
+{
+  if(characteristicMotion)
+  {
+    log("Mouth open");
+    let ledValue = new Uint8Array([3]);
+
+    characteristicMotion.writeValue(ledValue);
+  }
+}
+
+function onMotionMouthButtonRelease()
+{
+  if(characteristicMotion)
+  {
+    log("Tail close");
+    let ledValue = new Uint8Array([0x30]);
+
+    characteristicMotion.writeValue(ledValue);
+  }
+}
+
+function addPlayButtons(str)
 {
   var btn;
   var buttonText;
@@ -169,7 +249,7 @@ function addButtons(str)
     //btn.style.width = "50%";
     //btn.style.margin = "auto";
     //btn.style.display = "block";
-    btn.onclick = onButtonClick;
+    btn.onclick = onPlayButtonClick;
     buttonText = document.createTextNode(res[i]);
     btn.appendChild(buttonText);
     buttonParagraph.appendChild(btn);
@@ -178,7 +258,7 @@ function addButtons(str)
 
 document.querySelector('#connectButton').addEventListener('click', function() {
 
-  //addButtons("button1\nbutton2\nbutton3\nbutton4");
+  //addPlayButtons("button1\nbutton2\nbutton3\nbutton4");
 
 
   if (isWebBluetoothEnabled()) {
