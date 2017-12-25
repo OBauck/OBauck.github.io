@@ -87,7 +87,8 @@
         filters: [{
         //services: [GlassLightServiceUuid]
         name: 'glass_light'
-      }]
+      }],
+      optionalServices: [GlassLightServiceUuid]
     })
     .then(device => {
       bluetoothDevice = device;
@@ -96,8 +97,6 @@
       return device.gatt.connect();
     })
     .then(server => {
-      document.getElementById("disconnectButton").disabled = false;
-      document.getElementById("connectButton").disabled = true;
       log('Getting Service...');
       return server.getPrimaryService(GlassLightServiceUuid);
     })
@@ -118,6 +117,8 @@
         }
       })
 
+      document.getElementById("disconnectButton").disabled = false;
+      document.getElementById("connectButton").disabled = true;
       return queue;
     })
     .catch(error => {
