@@ -1,0 +1,204 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Big mouth billy bass">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Glass light</title>
+    <script async="" src="https://www.google-analytics.com/analytics.js"></script><script>
+      // Add a global error event listener early on in the page load, to help ensure that browsers
+      // which don't support specific functionality still end up displaying a meaningful message.
+      window.addEventListener('error', function(error) {
+        if (ChromeSamples && ChromeSamples.setStatus) {
+          console.error(error);
+          ChromeSamples.setStatus(error.message + ' (Your browser may not support this feature. Use chrome on android 6 or higher)');
+          error.preventDefault();
+        }
+      });
+    </script>
+    
+    <link rel="stylesheet" href="main.css">
+    
+  </head>
+
+<body>
+
+<p>
+  <button id="connectButton"> Connect </button>
+  <button id="disconnectButton" disabled="true"> Disconnect </button>
+</p>
+
+<div id="colorPickerDiv">
+
+  <input type="color" id="colorPicker" onChange="clickColor()" value="#000000">
+
+</div>
+
+<h3>Live Output</h3>
+<div id="output" class="output">
+  <div id="content"></div>
+  <div id="status"></div>
+  <pre id="log"></pre>
+</div>
+
+<script>
+
+  var ChromeSamples = {
+    log: function() {
+      var line = Array.prototype.slice.call(arguments).map(function(argument) {
+        return typeof argument === 'string' ? argument : JSON.stringify(argument);
+      }).join(' ');
+      document.querySelector('#log').textContent += line + '\n';
+    },
+    clearLog: function() {
+      document.querySelector('#log').textContent = '';
+    },
+    setStatus: function(status) {
+      document.querySelector('#status').textContent = status;
+    },
+    setContent: function(newContent) {
+      var content = document.querySelector('#content');
+      while(content.hasChildNodes()) {
+        content.removeChild(content.lastChild);
+      }
+      content.appendChild(newContent);
+    }
+  };
+
+  </script>
+
+  <script>
+
+  var bluetoothDevice;
+  var characteristicColor;
+  let decoder = new TextDecoder('utf-8');
+
+  let GlassLightServiceUuid = '28d40001-4ca6-4b4d-9f0e-29cdb15ae435';
+  let characteristicUuidColor = '28d40002-4ca6-4b4d-9f0e-29cdb15ae435';
+
+  function onConnectButtonClick() {
+
+    log('Requesting Bluetooth Device with Glass light Service UUID');
+    navigator.bluetooth.requestDevice({
+        filters: [{
+        //services: [GlassLightServiceUuid]
+        name: 'glass_light'
+      }]
+    })
+    .then(device => {
+      bluetoothDevice = device;
+      bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+      log('Connecting to GATT Server...');
+      return device.gatt.connect();
+    })
+    .then(server => {
+      document.getElementById("disconnectButton").disabled = false;
+      document.getElementById("connectButton").disabled = true;
+      log('Getting Service...');
+      return server.getPrimaryService(GlassLightServiceUuid);
+    })
+    .then(service => {
+      log('Getting Characteristics...');
+      return service.getCharacteristics();
+    })
+    .then(characteristics => {
+
+      let queue = Promise.resolve();
+
+      characteristics.forEach(characteristic => {
+        switch (characteristic.uuid) {
+          case characteristicUuidColor:
+            log("storing characteristic color")
+            characteristicColor = characteristic;
+            break;
+        }
+      })
+
+      return queue;
+    })
+    .catch(error => {
+      log('Argh! ' + error);
+    });
+  } 
+
+function onDisconnected(event) {
+  document.getElementById("disconnectButton").disabled = true;
+  document.getElementById("connectButton").disabled = false;
+
+  document.getElementById("colorPicker").value = '#000000'
+
+  bluetoothDevice = null;
+  // Object event.target is Bluetooth Device getting disconnected.
+  log('Bluetooth Device disconnected');
+}
+
+function onDisconnectButtonClick() {
+  if (!bluetoothDevice) {
+    return;
+  }
+  log('Disconnecting from Bluetooth Device...');
+  if (bluetoothDevice.gatt.connected) {
+    bluetoothDevice.gatt.disconnect();
+  } else {
+    log('Bluetooth Device is already disconnected');
+  }
+}
+
+function clickColor()
+{
+  var color = document.getElementById("colorPicker").value;
+
+  log(color);
+
+  var r = parseInt(color.substr(1,2), 16);
+  var b = parseInt(color.substr(3,2), 16);
+  var g = parseInt(color.substr(5,2), 16);
+
+  log(r);
+  log(g);
+  log(b);
+
+  let ledValue = new Uint8Array([r, g, b]);
+
+  log(ledValue);
+
+  if(characteristicColor)
+  {
+    characteristicColor.writeValue(ledValue);
+  }
+}
+
+document.querySelector('#connectButton').addEventListener('click', function() {
+  if (isWebBluetoothEnabled()) {
+    ChromeSamples.clearLog();
+    onConnectButtonClick();
+  }  
+});
+
+document.querySelector('#disconnectButton').addEventListener('click', function() {
+  if (isWebBluetoothEnabled()) {
+    onDisconnectButtonClick();
+  }  
+});
+
+</script>
+
+<script>
+  log = ChromeSamples.log;
+  function isWebBluetoothEnabled() {
+    if (navigator.bluetooth) {
+      return true;
+    } else {
+      ChromeSamples.setStatus('Web Bluetooth API is not available.\n' +
+          'Please make sure the "Experimental Web Platform features" flag is enabled.');
+      return false;
+    }
+  }
+</script>
+
+</body>
+</html>
