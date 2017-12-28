@@ -32,10 +32,16 @@
   <button id="disconnectButton" disabled="true"> Disconnect </button>
 </p>
 
+<!--
 <div id="colorPickerDiv">
 
-  <input type="color" id="colorPicker" onChange="clickColor()" value="#000000" disabled="true">
+  <input type="color" id="colorPicker" value="#000000" disabled="true">
 
+</div>
+-->
+
+<div class="slidecontainer">
+  <input type="range" min="0" max="360" value="180" class="slider" id="myRange">
 </div>
 
 <h3>Live Output</h3>
@@ -119,7 +125,7 @@
 
       document.getElementById("disconnectButton").disabled = false;
       document.getElementById("connectButton").disabled = true;
-      document.getElementById("colorPicker").disabled = false;
+      //document.getElementById("colorPicker").disabled = false;
       return queue;
     })
     .catch(error => {
@@ -130,9 +136,9 @@
 function onDisconnected(event) {
   document.getElementById("disconnectButton").disabled = true;
   document.getElementById("connectButton").disabled = false;
-  document.getElementById("colorPicker").disabled = true;
+  //document.getElementById("colorPicker").disabled = true;
 
-  document.getElementById("colorPicker").value = '#000000'
+  //document.getElementById("colorPicker").value = '#000000'
 
   bluetoothDevice = null;
   // Object event.target is Bluetooth Device getting disconnected.
@@ -151,24 +157,77 @@ function onDisconnectButtonClick() {
   }
 }
 
+var color;
+var colorChanged = true;
+var slider = document.getElementById("myRange");
+
 function clickColor()
 {
   if(characteristicColor)
   {
-    var color = document.getElementById("colorPicker").value;
+    //var colorVal = document.getElementById("colorPicker").value;
 
-    //convert from hex string to int
-    //fex #ff1099 --> r = 255, g = 16, b = 153
-    var r = parseInt(color.substr(1,2), 16);
-    var g = parseInt(color.substr(3,2), 16);
-    var b = parseInt(color.substr(5,2), 16);
+    if(colorChanged)
+    {
+      colorChanged = false;
+      //convert from hex string to int
+      //fex #ff1099 --> r = 255, g = 16, b = 153
+      //var r = parseInt(color.substr(1,2), 16);
+      //var g = parseInt(color.substr(3,2), 16);
+      //var b = parseInt(color.substr(5,2), 16);
 
-    let ledValue = new Uint8Array([r, g, b]);
+      //let ledValue = new Uint8Array([r, g, b]);
 
-    //log(ledValue);
+      let ledValue = new Uint8Array(hslToRgb(slider.value/360,1,0.5));
 
-    characteristicColor.writeValue(ledValue);
+      //log(hslToRgb(0.5, 1, 0.5));
+
+      //log(ledValue);
+
+      characteristicColor.writeValue(ledValue);
+    }
   }
+}
+
+//start a timer to check color picked every x ms
+setInterval(clickColor, 50);
+
+//var sliderThumb = document.getElementById("myRange::-webkit-slider-thumb");
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function hslToRgb(h, s, l) {
+  var r, g, b;
+
+  if (s == 0) {
+    r = g = b = l; // achromatic
+  } else {
+    function hue2rgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    }
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  //return '#'+ componentToHex(Math.round(r * 255)) + componentToHex(Math.round(g * 255)) + componentToHex(Math.round(b * 255));
+}
+
+slider.oninput = function() {
+    colorChanged = true;
 }
 
 document.querySelector('#connectButton').addEventListener('click', function() {
