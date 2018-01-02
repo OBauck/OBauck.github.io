@@ -43,10 +43,10 @@
 <div class="slidecontainer">
   <p style="text-align:center;">Color</p>
   <input type="range" min="0" max="360" value="180" class="slider" id="hueSlider">
-  <p style="text-align:center;">Saturation</p>
-  <input type="range" min="0" max="100" value="100" class="slider" id="satSlider">
   <p style="text-align:center;">Lightness</p>
   <input type="range" min="0" max="100" value="100" class="slider" id="lightSlider">
+  <p style="text-align:center;">Saturation</p>
+  <input type="range" min="0" max="100" value="100" class="slider" id="satSlider">
 </div>
 
 <h3>Live Output</h3>
@@ -165,8 +165,8 @@ function onDisconnectButtonClick() {
 var color;
 var colorChanged = true;
 var hueSlider = document.getElementById("hueSlider");
-var satSlider = document.getElementById("satSlider");
 var lightSlider = document.getElementById("lightSlider");
+var satSlider = document.getElementById("satSlider");
 
 function clickColor()
 {
@@ -185,7 +185,7 @@ function clickColor()
 
       //let ledValue = new Uint8Array([r, g, b]);
 
-      let ledValue = new Uint8Array(HSVtoRGB(hueSlider.value/360,lightSlider.value/100,satSlider.value/100));
+      let ledValue = new Uint8Array(HSVtoRGB(hueSlider.value/360,satSlider.value/100,lightSlider.value/100));
 
       //log(ledValue);
 
@@ -249,23 +249,34 @@ function HSVtoRGB(h, s, v) {
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-hueSlider.oninput = function() {
+
+function changeSlideColors()
+{
     colorChanged = true;
 
-    var rgb = hslToRgb(hueSlider.value/360,1,0.5);
+    var sat = satSlide.value/100;
+    var light = lightSlider.value/100;
+
+    var rgb = HSVtoRGB(hueSlider.value/360, sat, light);
 
     var rgb_string = '#'+ componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
 
-    satSlider.style.background = 'linear-gradient(to right, black,' + rgb_string + ')';
-    lightSlider.style.background = 'linear-gradient(to right, white,' + rgb_string + ')';
+    lightSlider.style.background = 'linear-gradient(to right, black,' + rgb_string + ')';
+    satSlider.style.background = 'linear-gradient(to right, white,' + rgb_string + ')';
+
+    //var red     = '#'+ componentToHex(rgb[0] * sat) + componentToHex(rgb[1] * (1 - light)) + componentToHex(rgb[2] * (1 - light));
 }
 
-satSlider.oninput = function() {
-    colorChanged = true;
+hueSlider.oninput = function() {
+    changeSlideColors();
 }
 
 lightSlider.oninput = function() {
-    colorChanged = true;
+    changeSlideColors();
+}
+
+satSlider.oninput = function() {
+    changeSlideColors();
 }  
 
 document.querySelector('#connectButton').addEventListener('click', function() {
