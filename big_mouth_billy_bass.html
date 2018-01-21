@@ -231,6 +231,12 @@ function addPlayButtons(str)
   var buttonText;
   var buttonParagraph = document.querySelector('#playButtons');
 
+  //remove buttons if there are any
+  while (buttonParagraph.hasChildNodes()) 
+  {   
+    buttonParagraph.removeChild(buttonParagraph.firstChild);
+  }
+
   var res = str.split("\n");
   for(i = 0; i < res.length; i++)
   {
