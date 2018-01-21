@@ -34,9 +34,9 @@
 
 <div id="motionButtons">
 
-  <button id="motionHead" onclick="onMotionHeadButtonClick()"> Head </button>
-  <button id="motionTail" ontouchstart="onMotionTailButtonClick()" ontouchend="onMotionTailButtonRelease()"> Tail </button>
-  <button id="motionMouth" ontouchstart="onMotionMouthButtonClick()" ontouchend="onMotionMouthButtonRelease()"> Mouth </button>
+  <button id="motionHead" onclick="onMotionHeadButtonClick()" disabled="true"> Head </button>
+  <button id="motionTail" ontouchstart="onMotionTailButtonClick()" ontouchend="onMotionTailButtonRelease()" disabled="true"> Tail </button>
+  <button id="motionMouth" ontouchstart="onMotionMouthButtonClick()" ontouchend="onMotionMouthButtonRelease()" disabled="true"> Mouth </button>
 
 </div>
 
@@ -79,6 +79,7 @@
 
   <script>
 
+  var bluetoothDevice;
   var characteristicPlay;
   var characteristicMotion;
   let decoder = new TextDecoder('utf-8');
@@ -97,6 +98,8 @@
       }]
     })
     .then(device => {
+      bluetoothDevice = device;
+      bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
       log('Connecting to GATT Server...');
       return device.gatt.connect();
     })
@@ -133,6 +136,13 @@
         }
       })
 
+      document.getElementById("disconnectButton").disabled = false;
+      document.getElementById("connectButton").disabled = true;
+
+      document.getElementById("motionHead").disabled = false;
+      document.getElementById("motionTail").disabled = false;
+      document.getElementById("motionMouth").disabled = false;
+
       return queue;
     })
     .catch(error => {
@@ -141,6 +151,7 @@
   } 
 
 function onDisconnectButtonClick() {
+  log("Disconnect button click");
   if (!bluetoothDevice) {
     return;
   }
@@ -153,6 +164,23 @@ function onDisconnectButtonClick() {
 }
 
 function onDisconnected(event) {
+  document.getElementById("disconnectButton").disabled = true;
+  document.getElementById("connectButton").disabled = false;
+
+  document.getElementById("motionHead").disabled = true;
+  document.getElementById("motionTail").disabled = true;
+  document.getElementById("motionMouth").disabled = true;
+
+  bluetoothDevice = null;
+
+  var buttonParagraph = document.querySelector('#playButtons');
+
+  //remove buttons if there are any
+  while (buttonParagraph.hasChildNodes()) 
+  {   
+    buttonParagraph.removeChild(buttonParagraph.firstChild);
+  }
+
   // Object event.target is Bluetooth Device getting disconnected.
   log('> Bluetooth Device disconnected');
 }
@@ -253,15 +281,17 @@ function addPlayButtons(str)
 }
 
 document.querySelector('#connectButton').addEventListener('click', function() {
-
-  //addPlayButtons("button1\nbutton2\nbutton3\nbutton4");
-
-
   if (isWebBluetoothEnabled()) {
     ChromeSamples.clearLog();
     onConnectButtonClick();
   }
   
+});
+
+document.querySelector('#disconnectButton').addEventListener('click', function() {
+  if (isWebBluetoothEnabled()) {
+    onDisconnectButtonClick();
+  }  
 });
 
 </script>
